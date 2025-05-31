@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Damage Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+    label, button { font-size: 1rem; }
+    #response { margin-top: 1rem; white-space: pre-wrap; background-color: #f5f5f5; padding: 1rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Report Package Damage</h1>
+  <form id="reportForm" enctype="multipart/form-data">
+    <label for="image">Choose image (JPEG/PNG):</label><br/>
+    <input type="file" id="image" name="image" accept="image/*" required /><br/><br/>
+
+    <label>
+      <input type="checkbox" id="notify" name="notify" />
+      Notify sender (if email found)
+    </label><br/><br/>
+
+    <button type="submit">Submit</button>
+  </form>
+  <div id="response"></div>
+
+  <script>
+    const form = document.getElementById("reportForm");
+    const responseDiv = document.getElementById("response");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      responseDiv.textContent = "Processing…";
+
+      const data = new FormData(form);
+      // Replace <YOUR_CNAME> with your actual EB CNAME (e.g., dmg-env.eba-abc123.eu-north-1.elasticbeanstalk.com)
+      const resp = await fetch(
+        "https://<YOUR_CNAME>/report-damage/",
+        {
+          method: "POST",
+          body: data
+        }
+      );
+      const result = await resp.json();
+      responseDiv.textContent = JSON.stringify(result, null, 2);
+    });
+  </script>
+</body>
+</html>

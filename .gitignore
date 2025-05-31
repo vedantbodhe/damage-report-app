@@ -1,0 +1,16 @@
+# Byte‐compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+
+# Local uploads directory
+uploads/
+
+# Environment variables file
+.env
+
+# macOS metadata
+.DS_Store
