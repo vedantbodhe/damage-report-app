@@ -4,36 +4,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Damage Report App – Menu</title>
+  <title>Report My Damage!</title>
   <link
     href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
     rel="stylesheet"
   />
+  <style>
+    /* Custom gradients and subtle animations */
+    .gradient-bg {
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #2563eb, #4f46e5);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #4f46e5, #2563eb);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-    <div class="p-6">
-      <h1 class="text-2xl font-bold mb-4">Damage Report App</h1>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+    <!-- Header / Hero Section -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-600 p-8">
+      <h1 class="text-4xl font-extrabold text-white text-center tracking-tight">
+        Report My Damage!
+      </h1>
+      <p class="mt-2 text-lg text-indigo-100 text-center">
+        Submit and track package damage reports instantly
+      </p>
+    </div>
 
-      <nav class="space-y-4">
+    <!-- Main Menu -->
+    <div class="p-8 space-y-6">
+      <!-- Card: Submit Report -->
+      <div class="bg-gray-50 rounded-xl shadow-inner p-6 hover:shadow-lg transition-shadow duration-200">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">📝 Submit a New Damage Report</h2>
+        <p class="text-gray-600 mb-4">
+          Quickly upload images of damaged packages, identify issues, and notify senders automatically.
+        </p>
         <a
           href="/form"
-          class="block w-full bg-blue-600 text-white py-2 px-4 rounded text-center hover:bg-blue-700"
+          class="inline-block btn-gradient text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
         >
-          📝 Submit a New Damage Report
+          Go to Form
         </a>
-        <a
-          href="https://github.com/your‐repo"
-          target="_blank"
-          class="block w-full bg-gray-600 text-white py-2 px-4 rounded text-center hover:bg-gray-700"
-        >
-          📂 View Source (on GitHub)
-        </a>
-        <!-- Add other menu links here if you want -->
-      </nav>
+      </div>
 
-      <p class="mt-6 text-sm text-gray-600">
-        © 2025 Damage Report App Team
+      <!-- Card: Track Your Report -->
+      <div class="bg-gray-50 rounded-xl shadow-inner p-6 hover:shadow-lg transition-shadow duration-200">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">🔍 Track Your Report</h2>
+        <p class="text-gray-600 mb-4">
+          Already submitted a report? Enter your Report ID to check status and details.
+        </p>
+        <a
+          href="/track"
+          class="inline-block btn-gradient text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
+        >
+          Track Report
+        </a>
+      </div>
+
+      <!-- Card: FAQ -->
+      <div class="bg-gray-50 rounded-xl shadow-inner p-6 hover:shadow-lg transition-shadow duration-200">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">❓ Frequently Asked Questions</h2>
+        <p class="text-gray-600 mb-4">
+          Find answers to common questions about using Report My Damage! and troubleshooting tips.
+        </p>
+        <a
+          href="/faq"
+          class="inline-block btn-gradient text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
+        >
+          View FAQ
+        </a>
+      </div>
+
+      <!-- Card: Contact Form -->
+      <div class="bg-gray-50 rounded-xl shadow-inner p-6 hover:shadow-lg transition-shadow duration-200">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">✉️ Contact Us</h2>
+        <p class="text-gray-600 mb-4">
+          Have questions or feedback? Send us a message.
+        </p>
+        <a
+          href="/contact"
+          class="inline-block btn-gradient text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
+        >
+          Contact Form
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-100 p-4 text-center">
+      <p class="text-sm text-gray-500">
+        © 2025 Report My Damage! (Vedant Bodhe) &middot; All rights reserved.
+      </p>
+      <p class="text-sm text-gray-500">
+        © Original Idea: Sheila Osmani, Maria Diessner, Diana Privalenko
+      </p>
+      <p class="text-sm text-gray-500">
+        © Programming and App Development by Vedant Bodhe
       </p>
     </div>
   </div>

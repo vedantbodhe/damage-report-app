@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Report My Damage! – Track Your Report</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reuse the same gradient & button styles */
+    .gradient-bg {
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #2563eb, #4f46e5);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #4f46e5, #2563eb);
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-600 p-8">
+      <h1 class="text-4xl font-extrabold text-white text-center tracking-tight">
+        Track Your Damage Report
+      </h1>
+      <p class="mt-2 text-lg text-indigo-100 text-center">
+        Enter your Report ID to view its status
+      </p>
+    </div>
+
+    <!-- Track Form -->
+    <div class="p-8">
+      <form id="trackForm" class="space-y-6" action="/api/track-report" method="get">
+        <!-- Report ID input -->
+        <div>
+          <label for="reportId" class="block text-gray-700 font-medium">Report ID:</label>
+          <input
+            type="text"
+            id="reportId"
+            name="reportId"
+            placeholder="e.g. df914893-5af9-47ee-b4c3-38901d23d1f9"
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          />
+        </div>
+
+        <!-- Submit button -->
+        <div class="flex justify-center">
+          <button
+            type="submit"
+            class="btn-gradient text-white font-medium py-2 px-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
+          >
+            Track
+          </button>
+        </div>
+      </form>
+
+      <!-- Optional: A “Back to Menu” link -->
+      <div class="text-center mt-6">
+        <a
+          href="/"
+          class="text-indigo-600 hover:underline font-medium"
+        >
+          ← Back to Menu
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-100 p-4 text-center">
+      <p class="text-sm text-gray-500">
+        © 2025 Report My Damage! – Track Your Report
+      </p>
+    </div>
+  </div>
+</body>
+</html>

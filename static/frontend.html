@@ -4,51 +4,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Damage Report App – Submit</title>
+  <title>Report My Damage! – Submit Report</title>
   <link
     href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
     rel="stylesheet"
   />
+  <style>
+    /* Match the menu’s gradient theme */
+    .gradient-bg {
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #2563eb, #4f46e5);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #4f46e5, #2563eb);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-    <div class="p-6">
-      <h1 class="text-2xl font-bold mb-4">Report Package Damage</h1>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+    <!-- Header / Hero Section -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-600 p-8">
+      <h1 class="text-3xl font-extrabold text-white text-center tracking-tight">
+        Submit a Damage Report
+      </h1>
+      <p class="mt-2 text-indigo-100 text-center">
+        Upload an image of the damaged package and notify the sender automatically.
+      </p>
+    </div>
 
-      <form id="damageForm" class="space-y-4" action="#" method="post" enctype="multipart/form-data">
+    <!-- Form Section -->
+    <div class="p-8 space-y-6">
+      <form id="damageForm" class="space-y-6" action="#" method="post" enctype="multipart/form-data">
         <!-- Image upload -->
         <div>
-          <label class="block text-gray-700">Upload Image:</label>
+          <label class="block text-gray-800 font-semibold mb-1">Upload Image</label>
           <input
             type="file"
             id="imageInput"
             name="image"
             accept="image/*"
-            class="mt-1 block w-full text-gray-700"
+            class="mt-1 block w-full border border-gray-300 rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <!-- Notify checkbox -->
-        <div class="flex items-center space-x-2">
-          <input type="checkbox" id="notifyInput" name="notify" class="h-4 w-4">
-          <label for="notifyInput" class="text-gray-700">
-            Notify sender if email is found
+        <div class="flex items-center space-x-3">
+          <input type="checkbox" id="notifyInput" name="notify" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <label for="notifyInput" class="text-gray-800 font-medium">
+            NOTIFY VIA EMAIL! <br>Click here if you wish to send a report via email to the Sender.
           </label>
         </div>
 
         <!-- Sender email dropdown (example) -->
         <div>
-          <label class="block text-gray-700">Select Sender (example):</label>
+          <label class="block text-gray-800 font-semibold mb-1">Select Sender (example)</label>
           <select
             id="senderSelect"
             name="senderEmail"
-            class="mt-1 block w-full text-gray-700"
+            class="mt-1 block w-full border border-gray-300 rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">-- pick a Sender --</option>
-            <option value="vedantbodhe99@gmail.com">Vedant (V Solutions)</option>
-            <option value="bob@senders.com">Bob (bob@senders.com)</option>
-            <option value="charlie@shipper.net">Charlie (charlie@shipper.net)</option>
+            <option value="vedantbodhe99@gmail.com">Vedant (Velo Packers and Senders)</option>
+            <option value="sheila.osmani@w.hs-fulda.de">Sheila (Zufall Logistics Group)</option>
           </select>
           <p class="text-sm text-gray-500 mt-1">
             (If you check “Notify,” choose a sender from this list.)
@@ -59,12 +79,12 @@
         <button
           id="submitBtn"
           type="submit"
-          class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center"
+          class="w-full btn-gradient text-white font-medium py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 flex justify-center items-center"
         >
           <span id="btnText">Submit Report</span>
           <svg
             id="btnSpinner"
-            class="animate-spin h-5 w-5 ml-2 text-white hidden"
+            class="animate-spin h-5 w-5 ml-3 text-white hidden"
             xmlns="http://www.w3.org/2000/svg"
             fill="none" viewBox="0 0 24 24"
           >
@@ -84,13 +104,30 @@
       </form>
 
       <!-- Result Panel -->
-      <div id="resultPanel" class="mt-6 p-4 bg-green-50 rounded hidden">
-        <h2 class="text-xl font-semibold mb-2">Report Result</h2>
-        <p><strong>Report ID:</strong> <span id="resReportId"></span></p>
-        <p><strong>Barcode:</strong> <span id="resBarcode"></span></p>
-        <p><strong>Damage:</strong> <span id="resDamage"></span></p>
-        <p><strong>Emailed:</strong> <span id="resEmailed"></span></p>
+      <div id="resultPanel" class="mt-6 p-6 bg-green-50 rounded-xl shadow-inner hidden">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Report Result</h2>
+        <p class="text-gray-700 mb-2"><strong>Report ID:</strong> <span id="resReportId"></span></p>
+        <p class="text-gray-700 mb-2"><strong>Barcode:</strong> <span id="resBarcode"></span></p>
+        <p class="text-gray-700 mb-2"><strong>Damage:</strong> <span id="resDamage"></span></p>
+        <p class="text-gray-700"><strong>Emailed:</strong> <span id="resEmailed"></span></p>
       </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-100 p-4 text-center">
+      <p class="text-sm text-gray-500">
+        © 2025 Report My Damage! Team
+      </p>
+    </div>
+
+    <!-- Go Back to Menu Button -->
+    <div class="bg-white p-4 text-center">
+      <a
+        href="/"
+        class="inline-block text-blue-600 font-medium hover:underline"
+      >
+        ← Back to Menu
+      </a>
     </div>
   </div>
 

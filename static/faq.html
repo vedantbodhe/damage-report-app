@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Report My Damage! – FAQ</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #2563eb, #4f46e5);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #4f46e5, #2563eb);
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-600 p-8">
+      <h1 class="text-4xl font-extrabold text-white text-center tracking-tight">
+        Frequently Asked Questions
+      </h1>
+      <p class="mt-2 text-lg text-indigo-100 text-center">
+        Everything you need to know about Report My Damage!
+      </p>
+    </div>
+
+    <!-- FAQ Content -->
+    <div class="p-8 space-y-6">
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-800">Q: What is Report My Damage!?</h2>
+        <p class="mt-2 text-gray-600">
+          A: Report My Damage! is a web service that allows you to submit images of damaged packages, automatically identify the type of damage, store the report, and (optionally) notify the sender via email.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-800">Q: How long does it take to process a report?</h2>
+        <p class="mt-2 text-gray-600">
+          A: Once you submit your photo, our system uses AI (OpenAI Vision) to classify the damage in under 10 seconds. We then store your report immediately. If you request email notifications, those are sent within another 30 seconds.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-800">Q: Can I track my report?</h2>
+        <p class="mt-2 text-gray-600">
+          A: Yes! Simply click “Track Your Report” from the menu, enter your Report ID, and you’ll see the current status (damage type, timestamp, etc.). We plan to add more detailed status updates—stay tuned!
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-800">Q: Is my data stored securely?</h2>
+        <p class="mt-2 text-gray-600">
+          A: Absolutely. All images are uploaded to a securely configured S3 bucket. We never share your images or email addresses. For more details, see our Privacy Policy (link coming soon).
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-800">Q: Who can I contact for support?</h2>
+        <p class="mt-2 text-gray-600">
+          A: Use the “Contact Us” form from the menu or email us directly at <a href="mailto:support@reportmydamage.com" class="text-indigo-600 hover:underline">support@reportmydamage.com</a>. We’ll respond within 24 hours.
+        </p>
+      </div>
+    </div>
+
+    <!-- Back to Menu -->
+    <div class="p-6 text-center">
+      <a
+        href="/"
+        class="text-indigo-600 hover:underline font-medium"
+      >
+        ← Back to Menu
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-100 p-4 text-center">
+      <p class="text-sm text-gray-500">
+        © 2025 Report My Damage! – FAQ
+      </p>
+    </div>
+  </div>
+</body>
+</html>

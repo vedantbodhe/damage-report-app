@@ -21,7 +21,6 @@ from app.services.mailer import send_damage_report_email
 app = FastAPI()
 
 # ───── CORS ─────────────────────────────────────────────────────────────
-# If you load the HTML from the same host (e.g. http://localhost:8000), you can remove or narrow this.
 origins = ["http://localhost:8000", "http://localhost:8080"]
 app.add_middleware(
     CORSMiddleware,
@@ -68,6 +67,48 @@ async def serve_form() -> HTMLResponse:
     return HTMLResponse(content, status_code=200)
 
 
+@app.get("/track", include_in_schema=False)
+async def serve_track() -> HTMLResponse:
+    """
+    Serve the `static/track.html` at `/track`.
+    """
+    track_path = os.path.join("static", "track.html")
+    if not os.path.isfile(track_path):
+        return HTMLResponse("<h1>Track page not found</h1>", status_code=404)
+
+    with open(track_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    return HTMLResponse(content, status_code=200)
+
+
+@app.get("/faq", include_in_schema=False)
+async def serve_faq() -> HTMLResponse:
+    """
+    Serve the `static/faq.html` at `/faq`.
+    """
+    faq_path = os.path.join("static", "faq.html")
+    if not os.path.isfile(faq_path):
+        return HTMLResponse("<h1>FAQ page not found</h1>", status_code=404)
+
+    with open(faq_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    return HTMLResponse(content, status_code=200)
+
+
+@app.get("/contact", include_in_schema=False)
+async def serve_contact() -> HTMLResponse:
+    """
+    Serve the `static/contact.html` at `/contact`.
+    """
+    contact_path = os.path.join("static", "contact.html")
+    if not os.path.isfile(contact_path):
+        return HTMLResponse("<h1>Contact page not found</h1>", status_code=404)
+
+    with open(contact_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    return HTMLResponse(content, status_code=200)
+
+
 @app.post("/report-damage/")
 async def report_damage(
     image: UploadFile = File(...),
@@ -103,7 +144,6 @@ async def report_damage(
     if senderEmail:
         recipient_email = senderEmail.strip()
     elif notify:
-        # run Textract on the S3 key to extract text
         ocr_text = extract_text_with_textract(s3_key)
         match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", ocr_text)
         recipient_email = match.group(0) if match else None
