@@ -26,7 +26,7 @@ def upload_file_to_s3(local_path: str, s3_key: str) -> str:
         Filename=local_path,
         Bucket=S3_BUCKET,
         Key=s3_key,
-        ExtraArgs={"ACL": "public-read", "ContentType": content_type or "binary/octet-stream"},
+
     )
 
     # Construct a URL‐encoded public URL:
