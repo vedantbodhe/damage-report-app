@@ -1,48 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Damage Report</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
-    label, button { font-size: 1rem; }
-    #response { margin-top: 1rem; white-space: pre-wrap; background-color: #f5f5f5; padding: 1rem; border-radius: 4px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Damage Report App</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
 </head>
-<body>
-  <h1>Report Package Damage</h1>
-  <form id="reportForm" enctype="multipart/form-data">
-    <label for="image">Choose image (JPEG/PNG):</label><br/>
-    <input type="file" id="image" name="image" accept="image/*" required /><br/><br/>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="p-6">
+      <h1 class="text-2xl font-bold mb-4">Report Package Damage</h1>
 
-    <label>
-      <input type="checkbox" id="notify" name="notify" />
-      Notify sender (if email found)
-    </label><br/><br/>
+      <form id="damageForm" class="space-y-4">
+        <!-- Image upload -->
+        <div>
+          <label class="block text-gray-700">Upload Image:</label>
+          <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+            class="mt-1 block w-full text-gray-700"
+            required
+          />
+        </div>
 
-    <button type="submit">Submit</button>
-  </form>
-  <div id="response"></div>
+        <!-- Notify checkbox -->
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="notifyInput" class="h-4 w-4">
+          <label for="notifyInput" class="text-gray-700">
+            Notify sender if email is found
+          </label>
+        </div>
 
-  <script>
-    const form = document.getElementById("reportForm");
-    const responseDiv = document.getElementById("response");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      responseDiv.textContent = "Processing…";
+        <!-- Versender dropdown (example senders) -->
+        <div>
+          <label class="block text-gray-700">Select Sender (example):</label>
+          <select
+            id="senderSelect"
+            class="mt-1 block w-full text-gray-700"
+          >
+            <option value="">-- pick a Sender --</option>
+            <option value="vedantbodhe99@gmail.com">Vedant (V Solutions)</option>
+            <option value="bob@senders.com">Bob (bob@senders.com)</option>
+            <option value="charlie@shipper.net">Charlie (charlie@shipper.net)</option>
+          </select>
+          <p class="text-sm text-gray-500 mt-1">
+            (If you check “Notify,” choose a sender from this list.)
+          </p>
+        </div>
 
-      const data = new FormData(form);
-      // Replace <YOUR_CNAME> with your actual EB CNAME (e.g., dmg-env.eba-abc123.eu-north-1.elasticbeanstalk.com)
-      const resp = await fetch(
-        "https://<YOUR_CNAME>/report-damage/",
-        {
-          method: "POST",
-          body: data
-        }
-      );
-      const result = await resp.json();
-      responseDiv.textContent = JSON.stringify(result, null, 2);
-    });
-  </script>
+        <!-- Submit button -->
+        <button
+          id="submitBtn"
+          type="submit"
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center"
+        >
+          <span id="btnText">Submit Report</span>
+          <svg
+            id="btnSpinner"
+            class="animate-spin h-5 w-5 ml-2 text-white hidden"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12" cy="12" r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            ></path>
+          </svg>
+        </button>
+      </form>
+
+      <!-- Result Panel -->
+      <div id="resultPanel" class="mt-6 p-4 bg-green-50 rounded hidden">
+        <h2 class="text-xl font-semibold mb-2">Report Result</h2>
+        <p><strong>Report ID:</strong> <span id="resReportId"></span></p>
+        <p><strong>Barcode:</strong> <span id="resBarcode"></span></p>
+        <p><strong>Damage:</strong> <span id="resDamage"></span></p>
+        <p><strong>Emailed:</strong> <span id="resEmailed"></span></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="frontend.js"></script>
 </body>
 </html>

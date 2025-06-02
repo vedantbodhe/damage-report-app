@@ -1,49 +1,64 @@
-# damage-report-app/app/main.py
+# app/main.py
 
 import os
 import re
 import uuid
 import boto3
+from datetime import datetime
 
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import AWS_REGION
 from app.services.storage import upload_file_to_s3
 from app.services.barcode import scan_barcode
-from app.services.ocr import extract_text_from_image
 from app.services.classify import classify_damage_via_openai
 from app.services.mailer import send_damage_report_email
-
-# Initialize DynamoDB resource & table
-dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
-table = dynamodb.Table("DamageReports")
+from app.services.ocr import extract_text_from_image
 
 app = FastAPI()
+
+# ──────── CORS CONFIGURATION ────────────────────────────────────────────────
+origins = ["http://localhost:8080"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# If you want to store reports in DynamoDB, uncomment below:
+# dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+# table = dynamodb.Table("DamageReports")
+
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.post("/report-damage/")
 async def report_damage(
     image: UploadFile = File(...),
-    notify: bool = Form(False)
+    notify: bool = Form(False),
+    senderEmail: str | None = Form(None)
 ):
     """
-    1. Save uploaded image locally under UPLOAD_FOLDER.
-    2. Upload that image to S3 (returns image_url).
-    3. Scan for barcode in the image.
-    4. Run OCR to extract text, then regex‐find the first email address.
-    5. Classify damage via OpenAI Vision API.
-    6. If notify=True and email found, send an HTML email via SES.
-    7. Store metadata in DynamoDB (reportId, barcode, damage, imageUrl, email, emailed).
-    8. Return JSON with the results.
+    1. Save image locally
+    2. Upload to S3
+    3. Scan barcode
+    4. Determine recipient_email (senderEmail or OCR)
+    5. Classify damage via OpenAI Vision
+    6. If notify=True and recipient_email, send a detailed HTML email
+    7. (Optional) Store in DynamoDB
+    8. Return JSON
     """
-    # 1. Save the uploaded file locally
+
+    # 1. Save locally
     unique_id = str(uuid.uuid4())
     original_filename = image.filename
     filename = f"{unique_id}_{original_filename}"
     local_path = os.path.join(UPLOAD_FOLDER, filename)
-
     with open(local_path, "wb") as f:
         f.write(await image.read())
 
@@ -51,45 +66,97 @@ async def report_damage(
     s3_key = f"{unique_id}/{original_filename}"
     image_url = upload_file_to_s3(local_path, s3_key)
 
-    # 3. Scan barcode
+    # 3. Scan for barcode
     barcode_value = scan_barcode(local_path) or "unknown"
 
-    # 4. OCR → extract first email
-    ocr_text = extract_text_from_image(local_path)
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", ocr_text)
-    recipient_email = email_match.group(0) if email_match else None
+    # 4. Determine recipient_email
+    recipient_email = None
+    if senderEmail:
+        recipient_email = senderEmail.strip()
+    elif notify:
+        ocr_text = extract_text_from_image(local_path)
+        match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", ocr_text)
+        recipient_email = match.group(0) if match else None
 
-    # 5. Classify damage
-    damage_label = classify_damage_via_openai(local_path)
+    # 5. Classify damage via OpenAI Vision
+    damage_label = classify_damage_via_openai(image_url)
 
-    # 6. Send email if requested
+    # 6. Send detailed HTML email if requested
     email_sent = False
     if notify and recipient_email:
-        subject = f"Damage Report: {damage_label}"
-        html_body = (
-            f"<h2>Damage: <strong>{damage_label}</strong></h2>"
-            f"<p>Barcode (if any): <strong>{barcode_value}</strong></p>"
-            f"<p><img src='{image_url}' alt='damage image' /></p>"
-        )
+        # Include a timestamp so the sender knows when the report was filed
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        # Build a detailed HTML body
+        html_body = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.4;">
+            <h1 style="color: #2F4F4F;">Damage Report Notification</h1>
+            <p>Dear Sender,</p>
+            <p>
+              A new damage report has been submitted for one of your packages. 
+              Please find the details below:
+            </p>
+            <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; vertical-align: top; width: 150px;">Report ID:</td>
+                <td style="padding: 8px;">{unique_id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; vertical-align: top;">Timestamp:</td>
+                <td style="padding: 8px;">{timestamp}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; vertical-align: top;">Barcode:</td>
+                <td style="padding: 8px;">{barcode_value}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; vertical-align: top;">Damage Type:</td>
+                <td style="padding: 8px; color: #B22222;">{damage_label.capitalize()}</td>
+              </tr>
+            </table>
+            <p>
+              <strong>Image Preview:</strong><br/>
+              <img src="{image_url}" alt="Package Image" 
+                   style="max-width: 400px; border: 1px solid #ddd; margin-top: 10px;" />
+            </p>
+            <p style="margin-top: 20px;">
+              Please review this damage report and let us know if you require any action:
+              <ul>
+                <li>Return</li>
+                <li>Replacement</li>
+                <li>Dispose</li>
+                <li>Other</li>
+              </ul>
+            </p>
+            <p>
+              Thank you,<br/>
+              <em>Damage Report App Team</em>
+            </p>
+          </body>
+        </html>
+        """
+
+        # Send via AWS SES
         email_sent = send_damage_report_email(
             to_address=recipient_email,
-            subject=subject,
+            subject=f"Damage Report: {damage_label.capitalize()}",
             html_body=html_body
         )
 
-    # 7. Store metadata in DynamoDB
-    item = {
-        "reportId": unique_id,
-        "barcode": barcode_value,
-        "damage": damage_label,
-        "imageUrl": image_url,
-        "email": recipient_email or "none",
-        "emailed": email_sent
-    }
-    try:
-        table.put_item(Item=item)
-    except Exception as e:
-        print(f"DynamoDB put_item error: {e}")
+    # 7. (Optional) Store metadata in DynamoDB
+    # item = {
+    #     "reportId": unique_id,
+    #     "barcode": barcode_value,
+    #     "damage": damage_label,
+    #     "imageUrl": image_url,
+    #     "email": recipient_email or "none",
+    #     "emailed": email_sent
+    # }
+    # try:
+    #     table.put_item(Item=item)
+    # except Exception as e:
+    #     print(f"DynamoDB put_item error: {e}")
 
     # 8. Return JSON response
     return JSONResponse(
