@@ -4,28 +4,25 @@ import boto3
 from botocore.exceptions import ClientError
 from app.config import AWS_REGION, SES_SOURCE
 
-_ses_client = boto3.client("ses", region_name=AWS_REGION)
+ses = boto3.client("ses", region_name=AWS_REGION)
 
-def send_damage_report_email(to_address: str, subject: str, html_body: str) -> bool:
-    print(f"DEBUG ▶ send_damage_report_email called with to_address={to_address}")
-
-    if not SES_SOURCE:
-        print("MAILER: SES_SOURCE is not configured; skipping email.")
-        return False
-
+def send_damage_report_email(
+    to_address: str,
+    subject: str,
+    html_body: str
+) -> bool:
+    """
+    Sends an HTML email via AWS SES. Returns True on success, False on failure.
+    """
     try:
-        resp = _ses_client.send_email(
+        ses.send_email(
             Source=SES_SOURCE,
             Destination={"ToAddresses": [to_address]},
             Message={
                 "Subject": {"Data": subject},
-                "Body": {"Html": {"Data": html_body}}
-            }
+                "Body": {"Html": {"Data": html_body}},
+            },
         )
-        print("MAILER: SES send_email succeeded, MessageId:", resp["MessageId"])
         return True
-    except ClientError as e:
-        print("MAILER: SES send_email failed:", e.response["Error"]["Message"])
+    except ClientError:
         return False
-    finally:
-        print("DEBUG ▶ send_damage_report_email finished")

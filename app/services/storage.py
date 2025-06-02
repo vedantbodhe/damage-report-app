@@ -1,35 +1,33 @@
 # app/services/storage.py
 
-import os
-import mimetypes
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError
+import os
+from urllib.parse import quote_plus
 
 from app.config import AWS_REGION, S3_BUCKET
 
-_s3_client = boto3.client("s3", region_name=AWS_REGION)
+s3 = boto3.client("s3", region_name=AWS_REGION)
 
 def upload_file_to_s3(local_path: str, s3_key: str) -> str:
     """
-    Uploads the file at local_path to S3 under key s3_key,
-    and returns the public URL. Does NOT set an object ACL.
-    Assumes your bucket policy already allows public-read.
+    Upload the local file at `local_path` into S3 under the key `s3_key`.
+    Returns the public URL to that object (assuming the bucket allows public‐read).
     """
-    content_type = _guess_content_type(local_path)
+    content_type = None
+    # Optionally infer ContentType from the filename extension:
+    ext = os.path.splitext(local_path)[1].lower()
+    if ext in {".jpg", ".jpeg"}:
+        content_type = "image/jpeg"
+    elif ext == ".png":
+        content_type = "image/png"
+    # etc...
 
-    try:
-        _s3_client.upload_file(
-            Filename=local_path,
-            Bucket=S3_BUCKET,
-            Key=s3_key,
-            ExtraArgs={"ContentType": content_type}
-        )
-    except (BotoCoreError, ClientError) as e:
-        raise RuntimeError(f"S3 upload failed: {e}")
+    s3.upload_file(
+        Filename=local_path,
+        Bucket=S3_BUCKET,
+        Key=s3_key,
+        ExtraArgs={"ACL": "public-read", "ContentType": content_type or "binary/octet-stream"},
+    )
 
-    region = AWS_REGION
-    return f"https://{S3_BUCKET}.s3.{region}.amazonaws.com/{s3_key}"
-
-def _guess_content_type(file_path: str) -> str:
-    mtype, _ = mimetypes.guess_type(file_path)
-    return mtype or "application/octet-stream"
+    # Construct a URL‐encoded public URL:
+    return f"https://{S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/{quote_plus(s3_key)}"

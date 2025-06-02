@@ -13,10 +13,10 @@ if env_path.exists():
 AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")
 
 # S3 bucket name (exactly as created in S3 Console)
-S3_BUCKET = os.getenv("S3_BUCKET", "")
+S3_BUCKET = os.getenv("S3_BUCKET", "damage-report-app-fulda")
 
 # SES verified "From" email address
-SES_SOURCE = os.getenv("SES_SOURCE", "")
+SES_SOURCE = os.getenv("SES_SOURCE", "vedantbodhe@gmail.com")
 
 # OpenAI API key (for Vision API)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

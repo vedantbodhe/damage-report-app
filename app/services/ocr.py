@@ -1,13 +1,31 @@
-# damage-report-app/app/services/ocr.py
+# app/services/ocr.py
 
-import pytesseract
-from PIL import Image
+import boto3
+from botocore.exceptions import ClientError
+from app.config import AWS_REGION, S3_BUCKET
 
-def extract_text_from_image(image_path: str) -> str:
+textract = boto3.client("textract", region_name=AWS_REGION)
+
+def extract_text_with_textract(s3_key: str) -> str:
     """
-    Opens the image at image_path and runs Tesseract OCR (English + German).
-    Returns all detected text as a single string.
+    Pull raw text from an image in S3 via AWS Textract.
+    Returns the concatenated plain text (all pages).
     """
-    img = Image.open(image_path)
-    text = pytesseract.image_to_string(img, lang="eng+deu")
-    return text
+    try:
+        response = textract.detect_document_text(
+            Document={
+                "S3Object": {
+                    "Bucket": S3_BUCKET,
+                    "Name": s3_key
+                }
+            }
+        )
+    except ClientError as e:
+        print(f"Textract error: {e}")
+        return ""
+
+    lines = []
+    for block in response.get("Blocks", []):
+        if block["BlockType"] == "LINE":
+            lines.append(block["Text"])
+    return "\n".join(lines)

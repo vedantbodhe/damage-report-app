@@ -12,14 +12,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import AWS_REGION
 from app.services.storage import upload_file_to_s3
-from app.services.barcode import scan_barcode
+from app.services.barcode import scan_barcode_with_rekognition
+from app.services.ocr import extract_text_with_textract
 from app.services.classify import classify_damage_via_openai
 from app.services.mailer import send_damage_report_email
-from app.services.ocr import extract_text_from_image
 
 app = FastAPI()
 
-# ─────────────── CORS CONFIGURATION ──────────────────────────────────────────
 origins = ["http://localhost:8080"]
 app.add_middleware(
     CORSMiddleware,
@@ -28,11 +27,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# ──────────────────────────────────────────────────────────────────────────────
-
-# If you want to store reports in DynamoDB, uncomment below:
-# dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
-# table = dynamodb.Table("DamageReports")
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -43,18 +37,7 @@ async def report_damage(
     notify: bool = Form(False),
     senderEmail: str | None = Form(None)
 ):
-    """
-    1. Save image locally
-    2. Upload to S3
-    3. Scan barcode
-    4. Determine recipient_email (senderEmail or OCR)
-    5. Classify damage via OpenAI Vision
-    6. If notify=True and recipient_email, send a detailed HTML email
-    7. (Optional) Store in DynamoDB
-    8. Return JSON
-    """
-
-    # 1. Save locally
+    # 1) Save locally
     unique_id = str(uuid.uuid4())
     original_filename = image.filename
     filename = f"{unique_id}_{original_filename}"
@@ -62,32 +45,29 @@ async def report_damage(
     with open(local_path, "wb") as f:
         f.write(await image.read())
 
-    # 2. Upload to S3
+    # 2) Upload to S3
     s3_key = f"{unique_id}/{original_filename}"
     image_url = upload_file_to_s3(local_path, s3_key)
 
-    # 3. Scan for barcode
-    barcode_value = scan_barcode(local_path) or "unknown"
+    # 3) Barcode scan via Rekognition
+    barcode_value = scan_barcode_with_rekognition(s3_key) or "unknown"
 
-    # 4. Determine recipient_email
+    # 4) Determine recipient_email (senderEmail or OCR)
     recipient_email = None
     if senderEmail:
         recipient_email = senderEmail.strip()
     elif notify:
-        ocr_text = extract_text_from_image(local_path)
+        ocr_text = extract_text_with_textract(s3_key)
         match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", ocr_text)
         recipient_email = match.group(0) if match else None
 
-    # 5. Classify damage via OpenAI Vision
+    # 5) Classify damage via OpenAI Vision (pass the S3 URL)
     damage_label = classify_damage_via_openai(image_url)
 
-    # 6. Send detailed HTML email if requested
+    # 6) Send email if requested
     email_sent = False
     if notify and recipient_email:
-        # Include a timestamp so the sender knows when the report was filed
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
-        # Build a detailed HTML body
         html_body = f"""
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.4;">
@@ -137,28 +117,13 @@ async def report_damage(
         </html>
         """
 
-        # Send via AWS SES
         email_sent = send_damage_report_email(
             to_address=recipient_email,
             subject=f"Damage Report: {damage_label.capitalize()}",
             html_body=html_body
         )
 
-    # 7. (Optional) Store metadata in DynamoDB
-    # item = {
-    #     "reportId": unique_id,
-    #     "barcode": barcode_value,
-    #     "damage": damage_label,
-    #     "imageUrl": image_url,
-    #     "email": recipient_email or "none",
-    #     "emailed": email_sent
-    # }
-    # try:
-    #     table.put_item(Item=item)
-    # except Exception as e:
-    #     print(f"DynamoDB put_item error: {e}")
-
-    # 8. Return JSON response
+    # 7) Return JSON
     return JSONResponse(
         status_code=200,
         content={
@@ -171,8 +136,4 @@ async def report_damage(
 
 @app.get("/", include_in_schema=False)
 async def root() -> JSONResponse:
-    """
-    A simple health‐check endpoint.
-    Elastic Beanstalk will see this as HTTP 200.
-    """
     return JSONResponse({"status": "alive"})

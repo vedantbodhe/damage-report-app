@@ -38,7 +38,7 @@ def classify_damage_via_openai(image_url: str) -> str:
 
     try:
         response = client.responses.create(
-            model="gpt-4.1-mini",   # or "gpt-4o-mini" if available
+            model="gpt-4.1-mini",   # or “gpt-4o-mini” if that’s what you have enabled
             input=[message]
         )
     except Exception as e:
