@@ -19,7 +19,7 @@ from app.services.ocr import extract_text_from_image
 
 app = FastAPI()
 
-# ──────── CORS CONFIGURATION ────────────────────────────────────────────────
+# ─────────────── CORS CONFIGURATION ──────────────────────────────────────────
 origins = ["http://localhost:8080"]
 app.add_middleware(
     CORSMiddleware,
@@ -28,7 +28,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
 
 # If you want to store reports in DynamoDB, uncomment below:
 # dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
@@ -168,3 +168,11 @@ async def report_damage(
             "emailed": email_sent
         }
     )
+
+@app.get("/", include_in_schema=False)
+async def root() -> JSONResponse:
+    """
+    A simple health‐check endpoint.
+    Elastic Beanstalk will see this as HTTP 200.
+    """
+    return JSONResponse({"status": "alive"})
