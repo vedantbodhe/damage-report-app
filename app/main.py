@@ -128,7 +128,7 @@ async def report_damage(
                     to_address=senderEmail,
                     subject=f"Damage Report: {damage.capitalize()}",
                     html_body=html_body,
-                    s3_key=s3_key,
+
                 )
                 logger.info(f"[REPORT] Email sent: {emailed}")
             except Exception as e:
