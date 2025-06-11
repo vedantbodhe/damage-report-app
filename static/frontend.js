@@ -16,43 +16,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
   damageForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // 1) Ensure an image is selected
     if (!imageInput.files.length) {
-      alert("Please select an image.");
+      alert("Please select an image to upload.");
       return;
     }
 
-    // Show spinner + disable button
+    // 2) If Notify is checked, require a sender be chosen
+    if (notifyInput.checked && !senderSelect.value) {
+      alert("You checked Notify—please choose a sender from the dropdown.");
+      return;
+    }
+
+    // 3) Show spinner + disable button
     btnText.textContent = "Submitting…";
     btnSpinner.classList.remove("hidden");
     submitBtn.disabled = true;
     resultPanel.classList.add("hidden");
 
-    // Build FormData
+    // 4) Build FormData
     const formData = new FormData();
     formData.append("image", imageInput.files[0]);
     formData.append("notify", notifyInput.checked);
-    if (notifyInput.checked && senderSelect.value) {
+    if (notifyInput.checked) {
       formData.append("senderEmail", senderSelect.value);
     }
 
     try {
+      // 5) POST to your FastAPI endpoint (relative URL)
       const resp = await fetch("/report-damage/", {
         method: "POST",
         body: formData,
       });
 
-      // Always read the response body as text
-      const text = await resp.text();
+      // 6) Read and log the response body (for debugging)
+      const bodyText = await resp.text();
+      console.log("Response status:", resp.status);
+      console.log("Response body:", bodyText);
 
       if (!resp.ok) {
-        // Show the server's error message
-        throw new Error(`Server error ${resp.status}:\n${text}`);
+        throw new Error(`Server error ${resp.status}:\n${bodyText}`);
       }
 
-      // Parse JSON only if OK
-      const data = JSON.parse(text);
-
-      // Populate result panel
+      // 7) Parse JSON and display
+      const data = JSON.parse(bodyText);
       resReportId.textContent = data.reportId;
       resBarcode.textContent  = data.barcode;
       resDamage.textContent   = data.damage;
@@ -60,13 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
       resultPanel.classList.remove("hidden");
 
     } catch (err) {
-      alert("Error submitting report:\n" + err.message);
-      console.error(err);
+      console.error("Submit error:", err);
+      alert("Error submitting report—see console for details.");
     } finally {
-      // Reset button
-      btnText.textContent     = "Submit Report";
+      // 8) Restore button state
+      btnText.textContent = "Submit Report";
       btnSpinner.classList.add("hidden");
-      submitBtn.disabled      = false;
+      submitBtn.disabled = false;
     }
   });
 });
