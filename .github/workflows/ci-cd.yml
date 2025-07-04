@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Security & Deploy
 
 on:
   push:
@@ -14,37 +14,48 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: python
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
   secret-scan:
     name: Secret scanning with Gitleaks
+    needs: codeql
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Run Gitleaks
-        uses: zricethezav/gitleaks/v8@latest
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
+          # full history is needed to detect secrets in past commits
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          # exit-code=1 will fail the job if any leak is found
           args: --path=. --exit-code=1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     name: Deploy to Elastic Beanstalk
+    needs: secret-scan
     runs-on: ubuntu-latest
-    needs: [codeql, secret-scan]
-    env:
-      ENV_NAME: damage-env        # ← make sure this matches your EB env
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up Python 3.10
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Install AWS & EB CLI
         run: |
@@ -62,7 +73,6 @@ jobs:
         run: |
           eb init damage-report-app \
             --region eu-north-1 \
-            --platform "Python 3.10 running on 64bit Amazon Linux 2" \
-            --interactive false
-          eb use $ENV_NAME
-          eb deploy $ENV_NAME
+            --platform "Python 3.10"
+          eb use dmg-env
+          eb deploy dmg-env
