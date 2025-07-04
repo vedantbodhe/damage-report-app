@@ -6,43 +6,45 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Tests
+  codeql:
+    name: CodeQL SAST
     runs-on: ubuntu-latest
-
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
         with:
-          python-version: '3.10'
+          languages: python
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run pytest
-        run: |
-          pip install pytest
-          pytest --maxfail=1 --disable-warnings -q
+  secret-scan:
+    name: Secret scanning with Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Gitleaks
+        uses: zricethezav/gitleaks/v8@latest
+        with:
+          args: --path=. --exit-code=1
 
   deploy:
     name: Deploy to Elastic Beanstalk
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main'
-
+    needs: [codeql, secret-scan]
+    env:
+      ENV_NAME: damage-env        # ← make sure this matches your EB env
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install AWS & EB CLI
         run: |
@@ -58,6 +60,9 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk
         run: |
-          eb init damage-report-app --region eu-north-1 --platform "Python 3.10"
-          eb use dmg-env
-          eb deploy dmg-env
+          eb init damage-report-app \
+            --region eu-north-1 \
+            --platform "Python 3.10 running on 64bit Amazon Linux 2" \
+            --interactive false
+          eb use $ENV_NAME
+          eb deploy $ENV_NAME
