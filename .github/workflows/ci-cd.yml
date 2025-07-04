@@ -30,17 +30,16 @@ jobs:
     needs: codeql
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code (full history)
         uses: actions/checkout@v3
         with:
-          # full history is needed to detect secrets in past commits
           fetch-depth: 0
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          # exit-code=1 will fail the job if any leak is found
           args: --path=. --exit-code=1
+        # Gitleaks will comment on PRs if you enable it, needs GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -52,7 +51,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -63,10 +62,11 @@ jobs:
           pip install awscli awsebcli
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN || '' }}
           aws-region:            eu-north-1
 
       - name: Deploy to Elastic Beanstalk
