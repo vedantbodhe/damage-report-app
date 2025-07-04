@@ -14,29 +14,24 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: python
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+      - uses: github/codeql-action/analyze@v2
 
   secret-scan:
     name: Secret scanning with Gitleaks
     needs: codeql
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout full history
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v2
         with:
           args: --path=. --exit-code=1
         env:
@@ -47,8 +42,7 @@ jobs:
     needs: secret-scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Install EB CLI
         run: |
@@ -62,5 +56,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            eu-north-1
 
-      - name: Deploy to Elastic Beanstalk
-        run: eb deploy
+      - name: Bootstrap EB directory
+        run: |
+          eb init damage-report-app \
+             --region eu-north-1 \
+             --platform "python-3.11" \
+             --interactive=false
+          eb use damage-env
+
+      - name: Deploy
+        run: eb deploy damage-env
