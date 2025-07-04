@@ -15,12 +15,10 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v3
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: python
-
       - uses: github/codeql-action/analyze@v2
 
   secret-scan:
@@ -61,7 +59,7 @@ jobs:
           eb init damage-report-app \
              --region eu-north-1 \
              --platform "python-3.11" \
-             --interactive=false
+             --no-interactive
           eb use damage-env
 
       - name: Deploy
