@@ -8,7 +8,7 @@ from email.mime.text     import MIMEText
 from email.mime.image    import MIMEImage
 
 AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")
-SES_SOURCE = os.getenv("SES_SOURCE", "no-reply@example.com")
+SES_SOURCE = os.getenv("SES_SOURCE", "no-reply@reportmydamage.com")
 S3_BUCKET  = os.getenv("S3_BUCKET", "damage-report-app-fulda")
 
 ses_client = boto3.client("ses", region_name=AWS_REGION)
