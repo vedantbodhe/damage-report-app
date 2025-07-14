@@ -133,12 +133,9 @@ Copyright (c) 2025 Vedant Vinayak Bodhe. All rights reserved.
 
 This software and its associated files are the exclusive property of Vedant Vinayak Bodhe.
 
-You are not permitted to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, in whole or in part, without the express prior written permission of the copyright holder.
+You are not permitted to copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, in whole or in part, without the express prior written permission or credit of the copyright holder. 
 
-Any unauthorized use of this software is strictly prohibited and may result in legal action.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+Any unauthorized sale of this software is strictly prohibited and may result in legal action.
 
 Contact: vedantbodhe@gmail.com for licensing and work inquiries.
 
