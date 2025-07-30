@@ -1,6 +1,6 @@
 # Report My Damage!
 
-https://www.reportmydamage.com
+https://www.reportmydamage.com (currently disabled)
 
 Report My Damage! is a fast, serverless-ready web application that enables users to submit package damage reports via image uploads. Leveraging AWS services (S3, Rekognition, Textract, SES) and OpenAI Vision, it automates damage classification and optional email notifications to package senders. The app features a modern TailwindCSS-powered frontend and is deployed on AWS Elastic Beanstalk with a CI/CD pipeline.
 
@@ -125,9 +125,9 @@ Please follow our Code of Conduct.
 
 📄 License
 
-### I would love to collaborate to make this software reach its optimum potential.
+### I would love to collaborate on this project!
 ### Please feel free to contact in this case.
-### But since its my private project, copyright laws apply.
+### Copyright laws apply.
 
 Copyright (c) 2025 Vedant Vinayak Bodhe. All rights reserved.
 
